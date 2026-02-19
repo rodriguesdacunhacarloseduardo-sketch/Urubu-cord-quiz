@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Urubucord - Flamengo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vermelho: #C52626;
+            --vermelho-escuro: #8B1A1A;
+            --preto: #1A1A1A;
+            --preto-claro: #2D2D2D;
+            --dourado: #FFD700;
+            --branco: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--preto) 0%, var(--vermelho-escuro) 50%, var(--preto) 100%);
+            min-height: 100vh;
+            color: var(--branco);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, var(--vermelho), var(--dourado));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(197, 38, 38, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .subtitle {
+            color: var(--dourado);
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .trophy-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            border: 2px solid var(--vermelho);
+        }
+
+        .trophy-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(145deg, var(--preto-claro), var(--vermelho-escuro));
+            border-radius: 10px;
+            border: 1px solid var(--dourado);
+        }
+
+        .trophy-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--dourado);
+            display: block;
+        }
+
+        .trophy-name {
+            font-size: 0.9rem;
+            color: var(--branco);
+            margin-top: 5px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--vermelho), var(--vermelho-escuro));
+            color: var(--branco);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px;
+            border: 2px solid var(--dourado);
+            box-shadow: 0 4px 15px rgba(197, 38, 38, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(197, 38, 38, 0.6);
+            background: linear-gradient(45deg, var(--vermelho-escuro), var(--vermelho));
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--dourado);
+        }
+
+        .btn-secondary:hover {
+            background: var(--dourado);
+            color: var(--preto);
+        }
+
+        .level-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .level-btn {
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-btn.medium {
+            border-color: #3498db;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.05));
+        }
+
+        .level-btn.hard {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.05));
+        }
+
+        .level-btn.extreme {
+            border-color: #9b59b6;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.05));
+        }
+
+        .level-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .level-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .level-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .quiz-container {
+            background: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid var(--vermelho);
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--preto-claro);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--vermelho), var(--dourado));
+            transition: width 0.3s;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: var(--preto-claro);
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: var(--vermelho-escuro);
+            border-color: var(--vermelho);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: var(--vermelho);
+            border-color: var(--dourado);
+        }
+
+        .option.correct {
+            background: #27ae60;
+            border-color: #2ecc71;
+        }
+
+        .option.wrong {
+            background: #c0392b;
+            border-color: #e74c3c;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--dourado);
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--preto-claro), var(--vermelho-escuro));
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid var(--dourado);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '⚽';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.05;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--dourado);
+            margin: 20px 0;
+        }
+
+        .medal {
+            font-size: 5rem;
+            margin: 20px 0;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .medal-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dourado);
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dourado);
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--vermelho-escuro);
+        }
+
+        .ranking-table th {
+            background: var(--vermelho-escuro);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ranking-table tr:hover {
+            background: rgba(197, 38, 38, 0.2);
+        }
+
+        .rank-1 { color: #FFD700; font-weight: 900; }
+        .rank-2 { color: #C0C0C0; font-weight: 700; }
+        .rank-3 { color: #CD7F32; font-weight: 700; }
+
+        .admin-login {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .admin-btn {
+            background: transparent;
+            border: 2px solid var(--dourado);
+            color: var(--dourado);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: var(--dourado);
+            color: var(--preto);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--preto-claro), var(--vermelho-escuro));
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid var(--dourado);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dourado);
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dourado);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--vermelho);
+            background: var(--preto);
+            color: var(--branco);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--dourado);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--vermelho);
+            color: var(--branco);
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: 2px solid var(--dourado);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 3000;
+            display: none;
+            font-weight: 600;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .logo { font-size: 2rem; }
+            .trophy-info { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .quiz-container { padding: 20px; }
+            .question { font-size: 1.1rem; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--dourado);
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .setup-info {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid var(--dourado);
+        }
+
+        .setup-info h3 {
+            color: var(--dourado);
+            margin-bottom: 10px;
+        }
+
+        .hosting-guide {
+            background: rgba(0,0,0,0.6);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid var(--dourado);
+        }
+
+        .hosting-guide h3 {
+            color: var(--dourado);
+            margin-bottom: 15px;
+        }
+
+        .hosting-guide ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .hosting-guide li {
+            margin-bottom: 10px;
+        }
+
+        .hosting-guide a {
+            color: var(--dourado);
+            text-decoration: none;
+        }
+
+        .hosting-guide a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification"></div>
+
+    <div class="admin-login">
+        <button class="admin-btn" onclick="openAdminModal()">🔒 Moderação</button>
+    </div>
+
+    <!-- Modal Admin -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAdminModal()">&times;</span>
+            <h2 style="color: var(--dourado); margin-bottom: 20px;">Acesso da Moderação</h2>
+            <div id="loginForm">
+                <div class="input-group">
+                    <label>Senha de Acesso</label>
+                    <input type="password" id="adminPassword" placeholder="Digite a senha...">
+                </div>
+                <button class="btn" onclick="checkAdminLogin()" style="width: 100%;">Entrar</button>
+            </div>
+            <div id="adminPanel" class="hidden">
+                <h3 style="color: var(--dourado); margin-bottom: 15px;">Resultados Completos</h3>
+                <div id="adminResults" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Resultados serão inseridos aqui -->
+                </div>
+                <button class="btn btn-secondary" onclick="clearResults()" style="margin-top: 20px; width: 100%;">
+                    Limpar Histórico
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tela Inicial -->
+        <div id="homeScreen" class="screen active">
+            <header>
+                <h1 class="logo">Urubucord Quiz</h1>
+                <p class="subtitle">Teste seu conhecimento sobre o Maior do Mundo</p>
+            </header>
+
+            <div class="trophy-info">
+                <div class="trophy-item">
+                    <span class="trophy-number">4</span>
+                    <div class="trophy-name">Libertadores</div>
+                </div>
+                <div class="trophy-item">
+                    <span class="trophy-number">9</span>
+                    <div class="trophy-name">Brasileiros</div>
+                </div>
+                <div class="trophy-item">
+                    <span class="trophy-number">5</span>
+                    <div class="trophy-name">Copas do Brasil</div>
+                </div>
+                <div class="trophy-item">
+                    <span class="trophy-number">1</span>
+                    <div class="trophy-name">Mundial 1981</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <input type="text" id="playerName" placeholder="Digite seu nome..." 
+                    style="padding: 15px; width: 100%; max-width: 300px; border-radius: 50px; border: 2px solid var(--vermelho); 
+                    background: var(--preto-claro); color: var(--branco); text-align: center; font-size: 1.1rem; margin-bottom: 20px;">
+                
+                <div class="level-selection">
+                    <div class="level-btn medium" onclick="startQuiz('medium')">
+                        <div class="level-title">🥉 Nível Médio</div>
+                        <div class="level-desc">Para torcedores que acompanham o dia a dia</div>
+                    </div>
+                    <div class="level-btn hard" onclick="startQuiz('hard')">
+                        <div class="level-title">🥈 Nível Difícil</div>
+                        <div class="level-desc">Para quem viveu as glórias e derrotas</div>
+                    </div>
+                    <div class="level-btn extreme" onclick="startQuiz('extreme')">
+                        <div class="level-title">🥇 Nível Muito Difícil</div>
+                        <div class="level-desc">Apenas para ídolos de arquibancada</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="showRanking()">🏆 Ranking Global</button>
+            </div>
+
+            <!-- Configuração do Webhook -->
+            <div class="setup-info">
+                <h3>⚙️ Configuração do Discord (Apenas Moderação)</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Cole o link do webhook do Discord abaixo para ativar as notificações automáticas:</p>
+                <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." 
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--vermelho); background: var(--preto-claro); color: var(--branco); margin-bottom: 10px;">
+                <button class="btn" onclick="saveWebhook()" style="width: 100%; margin: 0;">💾 Salvar Webhook</button>
+                <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">
+                    💡 Como obter: Discord → Configurações do Servidor → Integrações → Webhooks → Novo Webhook
+                </p>
+            </div>
+
+            <!-- Guia de Hospedagem -->
+            <div class="hosting-guide">
+                <h3>🌐 Como colocar o site online (Ter um link pra compartilhar)</h3>
+                <ol>
+                    <li><strong>GitHub Pages (Grátis e fácil):</strong>
+                        <br>Crie uma conta no <a href="https://github.com" target="_blank">github.com</a> → Novo repositório → Upload do arquivo HTML → Settings → Pages → Source (main branch) → Salvar. Pronto! Link gerado em 2 minutos.
+                    </li>
+                    <li><strong>Netlify (Grátis):</strong>
+                        <br>Acesse <a href="https://netlify.com" target="_blank">netlify.com<
